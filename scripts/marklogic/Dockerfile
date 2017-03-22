@@ -1,7 +1,5 @@
 FROM patrickmcelwee/marklogic-dependencies:8-latest
 
-RUN yum -y install vim
-
 # Install MarkLogic
 WORKDIR /tmp
 ADD MarkLogic.rpm /tmp/MarkLogic.rpm
