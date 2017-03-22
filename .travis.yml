@@ -16,7 +16,6 @@ before_script:
   - docker run --name slamdata-mongodb-3-0 -p 27019:27017 -d mongo:3.0
   - docker run --name slamdata-mongodb-3-2 -p 27020:27017 -d mongo:3.2
   - docker run --name slamdata-mongodb-3-4 -p 27021:27017 -d mongo:3.4
-#  - docker run --name slamdata-postgres-9-6 -p 5432:5432 -d postgres:9.6
   - if [[ $QUASAR_MARKLOGIC_JSON || $QUASAR_MARKLOGIC_XML ]]; then ./scripts/installMarkLogic; fi
   - if [ $QUASAR_COUCHBASE ]; then ./scripts/startCouchbase; echo "couchbase=${QUASAR_COUCHBASE}" > $TEST_CONFIG_FILE ; fi
 
