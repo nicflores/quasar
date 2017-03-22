@@ -4,15 +4,22 @@ jdk: oraclejdk8
 dist: trusty
 sudo: false
 
-addons:
-  postgresql: 9.4
+#addons:
+#  postgresql: 9.4
 
 services:
   - docker
-  - postgresql
+#  - postgresql
 
 before_script:
   - docker run --name slamdata-mongodb-2-6 -p 27018:27017 -d tutum/mongodb:2.6
+  - docker run --name slamdata-mongodb-3-0 -p 27019:27017 -d mongo:3.0
+  - docker run --name slamdata-mongodb-3-2 -p 27020:27017 -d mongo:3.2
+  - docker run --name slamdata-mongodb-3-4 -p 27021:27017 -d mongo:3.4
+  - docker run --name slamdata-postgres-9-6 -p 5432:5432 -d postgres:9.6
+  - if [[ $QUASAR_MARKLOGIC_JSON || $QUASAR_MARKLOGIC_XML ]]; then ./scripts/installMarkLogic; fi
+  - if [ $QUASAR_COUCHBASE ]; then ./scripts/startCouchbase; echo "couchbase=${QUASAR_COUCHBASE}" > $TEST_CONFIG_FILE ; fi
+
 
 script:
   # Export color variables needed by travis_wait and travis_jigger
@@ -22,18 +29,18 @@ script:
   - export MONGO_PORT="MONGO_${MONGO_RELEASE}_PORT"
   - export MONGO_AUTH="MONGO_${MONGO_RELEASE}_AUTH"
 #  - ./scripts/installMongo mongodb-linux-x86_64-${!MONGO_LINUX} mongo ${!MONGO_PORT} ${!MONGO_AUTH}
-  - if [ $QUASAR_COUCHBASE ]; then ./scripts/startCouchbase; echo "couchbase=${QUASAR_COUCHBASE}" > $TEST_CONFIG_FILE ; fi
-  - if [[ $QUASAR_MARKLOGIC_JSON || $QUASAR_MARKLOGIC_XML ]]; then ./scripts/installMarkLogic; fi
+#  - if [ $QUASAR_COUCHBASE ]; then ./scripts/startCouchbase; echo "couchbase=${QUASAR_COUCHBASE}" > $TEST_CONFIG_FILE ; fi
+#  - if [[ $QUASAR_MARKLOGIC_JSON || $QUASAR_MARKLOGIC_XML ]]; then ./scripts/installMarkLogic; fi
   - if [ $QUASAR_MARKLOGIC_XML ]; then echo "marklogic_xml=${QUASAR_MARKLOGIC_XML}" > $TEST_CONFIG_FILE; fi
   - if [ $QUASAR_MARKLOGIC_JSON ]; then echo "marklogic_json=${QUASAR_MARKLOGIC_JSON}" > $TEST_CONFIG_FILE; fi
   - if [ $QUASAR_POSTGRESQL ]; then echo "postgresql=${QUASAR_POSTGRESQL}" > $TEST_CONFIG_FILE; fi
   - if [ $QUASAR_SPARK_LOCAL ]; then echo "spark_local=\"${HOME}/${QUASAR_SPARK_LOCAL}/\"" > $TEST_CONFIG_FILE; fi
-  - psql -c 'CREATE DATABASE "quasar-test";' -U postgres
-  - ./scripts/build $MONGO_RELEASE
   - docker ps -a
   - ps auxw
-  - sbt transferPublishAndTagResources
-  - ./scripts/publishAndTag 'quasar-analytics/quasar'
+  - psql -c 'CREATE DATABASE "quasar-test";' -U postgres
+  #- ./scripts/build $MONGO_RELEASE
+  #- sbt transferPublishAndTagResources
+  #- ./scripts/publishAndTag 'quasar-analytics/quasar'
 
 after_success: ./scripts/afterSuccess
 
