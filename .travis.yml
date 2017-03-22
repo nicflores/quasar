@@ -11,6 +11,9 @@ services:
   - docker
   - postgresql
 
+before_script:
+  - docker run --name slamdata-mongodb-2-6 -p 27018:27017 -d tutum/mongodb:2.6
+
 script:
   # Export color variables needed by travis_wait and travis_jigger
   - export ANSI_RED ANSI_GREEN ANSI_RESET ANSI_CLEAR
@@ -18,7 +21,7 @@ script:
   - export MONGO_LINUX="MONGO_${MONGO_RELEASE}_LINUX"
   - export MONGO_PORT="MONGO_${MONGO_RELEASE}_PORT"
   - export MONGO_AUTH="MONGO_${MONGO_RELEASE}_AUTH"
-  - ./scripts/installMongo mongodb-linux-x86_64-${!MONGO_LINUX} mongo ${!MONGO_PORT} ${!MONGO_AUTH}
+#  - ./scripts/installMongo mongodb-linux-x86_64-${!MONGO_LINUX} mongo ${!MONGO_PORT} ${!MONGO_AUTH}
   - if [ $QUASAR_COUCHBASE ]; then ./scripts/startCouchbase; echo "couchbase=${QUASAR_COUCHBASE}" > $TEST_CONFIG_FILE ; fi
   - if [[ $QUASAR_MARKLOGIC_JSON || $QUASAR_MARKLOGIC_XML ]]; then ./scripts/installMarkLogic; fi
   - if [ $QUASAR_MARKLOGIC_XML ]; then echo "marklogic_xml=${QUASAR_MARKLOGIC_XML}" > $TEST_CONFIG_FILE; fi
@@ -29,18 +32,18 @@ script:
   - ./scripts/build $MONGO_RELEASE
   - docker ps -a
   - ps auxw
-#  - sbt transferPublishAndTagResources
-#  - ./scripts/publishAndTag 'quasar-analytics/quasar'
+  - sbt transferPublishAndTagResources
+  - ./scripts/publishAndTag 'quasar-analytics/quasar'
 
-#after_success: ./scripts/afterSuccess
+after_success: ./scripts/afterSuccess
 
-#notifications:
-#  irc:
-#    template:
-#      - "%{result}: %{repository_slug}#%{build_number} (%{branch}@%{commit}: %{author})
-#        %{build_url}"
-#  slack:
-#    secure: k7tat0w0CSokOD1K0nfPhFY9Z3xkYHXboNlW1WgNAjqtq56hQsfQWhN8z6cXRAs/CgT8ME0K//wDN/HgdG91/aVh1smv/hxMa6P/o70GclhvUkB4iTis3kv9la3Kf2w3K5pbWJ6fFLdAZqc5i9XpQ8q+d7UTgwAxj1ZcYwaCSVo=
+notifications:
+  irc:
+    template:
+      - "%{result}: %{repository_slug}#%{build_number} (%{branch}@%{commit}: %{author})
+        %{build_url}"
+  slack:
+    secure: k7tat0w0CSokOD1K0nfPhFY9Z3xkYHXboNlW1WgNAjqtq56hQsfQWhN8z6cXRAs/CgT8ME0K//wDN/HgdG91/aVh1smv/hxMa6P/o70GclhvUkB4iTis3kv9la3Kf2w3K5pbWJ6fFLdAZqc5i9XpQ8q+d7UTgwAxj1ZcYwaCSVo=
 
 branches:
   except:
@@ -60,14 +63,14 @@ before_cache:
 env:
   matrix:
     - MONGO_RELEASE=2_6
-    - QUASAR_COUCHBASE='"couchbase://0.0.0.0?username=Administrator&password=password"'
-    - QUASAR_MARKLOGIC_JSON='"xcc://marklogic:marklogic@localhost:8000/Documents?format=json"'
-    - QUASAR_MARKLOGIC_XML='"xcc://marklogic:marklogic@localhost:8000/Documents?format=xml"'
-    - QUASAR_SPARK_LOCAL='spark_local_test'
-    - MONGO_RELEASE=3_0
-    - MONGO_RELEASE=3_0_RO
-    - MONGO_RELEASE=3_2
-    - QUASAR_POSTGRESQL='"jdbc:postgresql://localhost/quasar-test?user=postgres&password=postgres"'
+#    - QUASAR_COUCHBASE='"couchbase://0.0.0.0?username=Administrator&password=password"'
+#    - QUASAR_MARKLOGIC_JSON='"xcc://marklogic:marklogic@localhost:8000/Documents?format=json"'
+#    - QUASAR_MARKLOGIC_XML='"xcc://marklogic:marklogic@localhost:8000/Documents?format=xml"'
+#    - QUASAR_SPARK_LOCAL='spark_local_test'
+#    - MONGO_RELEASE=3_0
+#    - MONGO_RELEASE=3_0_RO
+#    - MONGO_RELEASE=3_2
+#    - QUASAR_POSTGRESQL='"jdbc:postgresql://localhost/quasar-test?user=postgres&password=postgres"'
 
   global:
     - COURSIER_PROGRESS=0
