@@ -56,18 +56,23 @@ fi
 if [[ "${JOB_NUM##*.}" == "1" ]]; then
   # Compiling `connector` can take awhile, so allow it some extra time when
   # running on travis to avoid having the build killed due to lack of output.
+  echo "job 1..."
   if [[ ${TRAVIS:-} ]]; then
+    echo "I'm in travis compiling connector..."
     travis_wait $TRAVIS_MAX_CONNECTOR_COMPILE_MINS "$SBT" -DisIsolatedEnv=${ISOLATED_ENV:=false} ++$TRAVIS_SCALA_VERSION clean coverage connector/test:compile
   else
+    echo "I'm not in travis just gonna clean..."
     "$SBT" ++$TRAVIS_SCALA_VERSION clean
   fi
 
   # Require that all header comments are present before proceeding, then
   # build and run all tests everywhere (including integration)
+  echo "Requiring headers..."
   "$SBT" -DisIsolatedEnv=${ISOLATED_ENV:=false} ++$TRAVIS_SCALA_VERSION checkHeaders coverage test exclusive:test coverageReport
 
   # In a fresh JVM process, re-compile without coverage in order to get a jar
   # that does not contain instrumentation. Generate doc.
+  echo "Re-compiling..."
   "$SBT" -DisIsolatedEnv=${ISOLATED_ENV:=false} ++$TRAVIS_SCALA_VERSION clean 'web/assembly' doc
 
   # Test to ensure the JAR file is valid:
@@ -80,11 +85,14 @@ if [[ "${JOB_NUM##*.}" == "1" ]]; then
 else
   # Compiling `connector` can take awhile, so allow it some extra time when
   # running on travis to avoid having the build killed due to lack of output.
+  echo "not job 1"
   if [[ ${TRAVIS:-} ]]; then
+    echo "in travis..."
     travis_wait $TRAVIS_MAX_CONNECTOR_COMPILE_MINS "$SBT" -DisIsolatedEnv=${ISOLATED_ENV:=false} ++$TRAVIS_SCALA_VERSION connector/test:compile
   fi
 
   # Not the first job in Travis; run only integration tests (no sense
   # re-doing work that isn't affected by the available backends)
+  echo "not job 1 only running integration test..."
   "$SBT" -DisIsolatedEnv=${ISOLATED_ENV:=false} ++$TRAVIS_SCALA_VERSION it/test it/exclusive:test
 fi
