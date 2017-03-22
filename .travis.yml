@@ -28,6 +28,7 @@ script:
   - psql -c 'CREATE DATABASE "quasar-test";' -U postgres
   - ./scripts/build $MONGO_RELEASE
   - docker ps -a
+  - ps auxw
 #  - sbt transferPublishAndTagResources
 #  - ./scripts/publishAndTag 'quasar-analytics/quasar'
 
