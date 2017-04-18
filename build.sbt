@@ -16,6 +16,11 @@ import scoverage._
 import slamdata.CommonDependencies
 import slamdata.SbtSlamData.transferPublishAndTagResources
 
+import scala.collection.immutable.Nil
+import scalaz.concurrent.Task
+import knobs.{Required, FileResource, Config}
+import ContainerMgr._
+
 val BothScopes = "test->test;compile->compile"
 
 // Exclusive execution settings
@@ -67,10 +72,47 @@ val targetSettings = Seq(
 
     val root = (baseDirectory in ThisBuild).value.getAbsolutePath
     val ours = baseDirectory.value.getAbsolutePath
-
     new File(root + File.separator + ".targets" + File.separator + ours.substring(root.length))
   }
 )
+
+// Containerized Connectors
+lazy val testConfigPath = settingKey[String]("The it/testing.conf file")
+testConfigPath := {
+  (baseDirectory.value /"it/testing.conf").getAbsolutePath
+}
+
+def getConnectorNames(cfg: Task[Config]): List[knobs.Name] = {
+  val connectors = for {
+    c <- cfg.map(a => a.env.seq.keys)
+  } yield c
+  connectors.unsafePerformSync.toList
+}
+
+lazy val connectors = settingKey[Seq[String]]("List of connectors from testing.conf")
+connectors := {
+  val cfg: Task[Config] = knobs.loadImmutable(Required(FileResource(new File(testConfigPath.value))) :: Nil)
+  getConnectorNames(cfg)
+}
+
+val startBackends = taskKey[Unit]("Start backend data stores")
+startBackends := {
+    ContainerMgr.beforeTest(connectors.value.map(c => "quasar_" + c).toList)
+    ()
+}
+
+val stopAndRemoveBackends = taskKey[Unit]("Start backend data stores")
+stopAndRemoveBackends := {
+    ContainerMgr.afterTest
+    ()
+}
+
+
+val hello = taskKey[Unit]("Print connector list")
+hello := {
+    connectors.value
+    ()
+}
 
 // In Travis, the processor count is reported as 32, but only ~2 cores are
 // actually available to run.
@@ -444,3 +486,10 @@ lazy val it = project
   .settings(inConfig(ExclusiveTests)(exclusiveTasks(test, testOnly, testQuick)): _*)
   .settings(parallelExecution in Test := false)
   .enablePlugins(AutomateHeaderPlugin)
+
+lazy val localIt = project
+  .settings(
+    test in Test := (Def.taskDyn {
+      stopAndRemoveBackends
+    }).value
+  )
