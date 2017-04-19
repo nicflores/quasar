@@ -1,18 +1,18 @@
+
 import java.io.File
 import scala.sys.process._
-import scala.collection.immutable.List
 import scala.collection.JavaConverters._
+import scala.collection.immutable.List
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.{Container, ExposedPort, Ports}
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientBuilder}
-import com.github.dockerjava.api.command.{BuildImageCmd, CreateContainerCmd}
+import com.github.dockerjava.api.command._
 import com.github.dockerjava.core.command.BuildImageResultCallback
 import java.lang.String
 import java.lang.Integer
 import scala.Int
 
 object ContainerMgr {
-
   // TODO: configure this without hard coding these values
   val dockerConfig = DefaultDockerClientConfig.createDefaultConfigBuilder
     .withDockerHost("tcp://192.168.99.101:2376")
@@ -64,8 +64,8 @@ object ContainerMgr {
     * @param ccc
     * @return
     */
-  def startContainer(ccc: CreateContainerCmd) = {
-    dockerClient.startContainerCmd(ccc.exec.getId).exec()
+  def startContainer(ccc: CreateContainerCmd): StartContainerCmd = {
+    dockerClient.startContainerCmd(ccc.exec.getId)
   }
 
   /** stop a containers
@@ -73,8 +73,8 @@ object ContainerMgr {
     * @param container
     * @return
     */
-  def stopContainer(container: Container) = {
-    dockerClient.stopContainerCmd(container.getId()).withTimeout(java.lang.Integer.valueOf(2)).exec()
+  def stopContainer(container: Container): StopContainerCmd = {
+    dockerClient.stopContainerCmd(container.getId()).withTimeout(java.lang.Integer.valueOf(2))
   }
 
   /** delete a containers
@@ -82,8 +82,8 @@ object ContainerMgr {
     * @param container
     * @return
     */
-  def deleteContainer(container: Container) = {
-    dockerClient.removeContainerCmd(container.getId()).exec()
+  def deleteContainer(container: Container): RemoveContainerCmd = {
+    dockerClient.removeContainerCmd(container.getId())
   }
 
   /** build docker image from a build image command
@@ -95,9 +95,9 @@ object ContainerMgr {
     bic.exec(new BuildImageResultCallback()).awaitImageId
   }
 
-  /** create a mongo container command, needs to be exec'ed by startContainer()
+  /** create a mongo container command
     *
-     * @param bports
+    * @param bports
     * @param containerName
     * @param image
     * @return
@@ -111,7 +111,7 @@ object ContainerMgr {
       .withName(containerName)
   }
 
-  /** create a portgresql container command, needs to be exec'ed by startContainer()
+  /** create a portgresql container command
     *
     * @param bports
     * @param containerName
@@ -126,7 +126,7 @@ object ContainerMgr {
       .withName(containerName)
   }
 
-  /** create a couchbase container command, needs to be exec'ed by startContainer()
+  /** create a couchbase container command
     *
     * @param bports
     * @param containerName
@@ -140,8 +140,6 @@ object ContainerMgr {
       .withPortBindings(bindPorts(exposedPorts(eports),portBindings(bports)))
       .withName(containerName)
   }
-  // TODO: copy script to quasar_postgresql container to configure it.
-  //createCouchbaseQuasarContainer(dockerClient, 0, "quasar_couchbase", "couchbase/server:enterprise-4.5.1")
 
   /** create marklogic image command, needs to be exec'ed by buildImage()
     *
@@ -158,7 +156,7 @@ object ContainerMgr {
       .withNoCache(java.lang.Boolean.FALSE)
   }
 
-  /** create a marklogic container command, needs to be exec'ed by startContainer()
+  /** create a marklogic container command
     *
     * @param bports
     * @param name
@@ -167,20 +165,20 @@ object ContainerMgr {
   def createMarklogicQuasarContainer(bports: List[Int], name: String, image: String): CreateContainerCmd = {
     val eports = List(8000,8001,8002)
     dockerClient.createContainerCmd(buildImage(imageInstructions("marklogic", image)))
-                    .withExposedPorts(exposedPorts(eports).asJava)
-                    .withPortBindings(bindPorts(exposedPorts(eports),portBindings(bports)))
-                    .withName(name)
+      .withExposedPorts(exposedPorts(eports).asJava)
+      .withPortBindings(bindPorts(exposedPorts(eports),portBindings(bports)))
+      .withName(name)
   }
 
-  /** starts a given list of containers
+  /**
     *
-    * @param containers
+    * @param container
     * @return
     */
   // TODO: figure out dockerfile path without hardcoding them
-  def start(containers: List[String]) = {
+  def start(container: String): StartContainerCmd = {
     val dockerfile = "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"
-    containers.foreach(container => container match {
+    container match {
       case "quasar_mongodb_2_6" => startContainer(createMongoQuasarContainer(List(27018), "quasar_mongodb_2_6", "tutum/mongodb:2.6"))
       case "quasar_mongodb_3_0" => startContainer(createMongoQuasarContainer(List(27019), "quasar_mongodb_3_0", "mongo:3.0"))
       case "quasar_mongodb_read_only" => startContainer(createMongoQuasarContainer(List(27020), "quasar_mongodb_read_only", "mongo:3.0"))
@@ -191,8 +189,8 @@ object ContainerMgr {
       case "quasar_couchbase" => startContainer(createCouchbaseQuasarContainer(List(8091, 8092, 8093, 8094, 11210), "quasar_couchbase", "couchbase/server:enterprise-4.5.1"))
       case "quasar_marklogic_xml" => startContainer(createMarklogicQuasarContainer(List(8000, 8001, 8002), "quasar_marklogic_xml", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"))
       case "quasar_marklogic_json" => startContainer(createMarklogicQuasarContainer(List(9000, 9001, 9002), "quasar_marklogic_json", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"))
-      case _ => "not gonna do anything"
-    })
+      //case _ => "not gonna do anything"
+    }
   }
 
   // TODO: update this to scala instead of shelling out
@@ -207,20 +205,20 @@ object ContainerMgr {
 
   val myQuasarContainers = List("quasar_mongodb_read_only", "quasar_metastore", "quasar_marklogic_xml")
 
-  def beforeTest(containers: List[String]) = {
-    start(containers)
+  def startup(containers: List[String]) = {
+    containers.map(start(_).exec())
+  }
+
+  def setup = {
     configureContainers
     assembleTestingConf
   }
 
-  def afterTest = {
-    getContainers.map(stopContainer(_))
-    getContainers.map(deleteContainer(_))
+  def stop = {
+    getContainers.map(stopContainer(_).exec())
   }
 
-  //beforeTest
-  //afterTest
-  //val x = getClass.getResource("").getPath
-  //println(x)
-
+  def cleanup = {
+    getContainers.map(deleteContainer(_).exec())
+  }
 }

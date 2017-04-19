@@ -95,24 +95,11 @@ connectors := {
   getConnectorNames(cfg)
 }
 
-val startBackends = taskKey[Unit]("Start backend data stores")
-startBackends := {
-    ContainerMgr.beforeTest(connectors.value.map(c => "quasar_" + c).toList)
-    ()
-}
-
-val stopAndRemoveBackends = taskKey[Unit]("Start backend data stores")
-stopAndRemoveBackends := {
-    ContainerMgr.afterTest
-    ()
-}
-
-
-val hello = taskKey[Unit]("Print connector list")
-hello := {
-    connectors.value
-    ()
-}
+//val hello = taskKey[Unit]("Print connector list")
+//hello := {
+//    connectors.value
+//    ()
+//}
 
 // In Travis, the processor count is reported as 32, but only ~2 cores are
 // actually available to run.
@@ -474,6 +461,22 @@ lazy val web = project
 
 /** Integration tests that have some dependency on a running connector.
   */
+lazy val itWithBackend = taskKey[Unit]("start backend, integration test, and then stop backend")
+
+
+val spinup = taskKey[List[java.lang.Void]]("Start backend containers")
+val cconfig = taskKey[String]("Setup backend containers")
+val cstop = taskKey[List[java.lang.Void]]("Stop backend containers")
+val ccleanup = taskKey[List[java.lang.Void]]("Clean up backend containers")
+
+cstop := {
+  ContainerMgr.stop
+}
+
+ccleanup := {
+  ContainerMgr.cleanup
+}
+
 lazy val it = project
   .configs(ExclusiveTests)
   .dependsOn(web % BothScopes, core % BothScopes)
@@ -485,11 +488,23 @@ lazy val it = project
   .settings(inConfig(ExclusiveTests)(Defaults.testTasks): _*)
   .settings(inConfig(ExclusiveTests)(exclusiveTasks(test, testOnly, testQuick)): _*)
   .settings(parallelExecution in Test := false)
+  .settings(
+    spinup := (Def.taskDyn {
+       ContainerMgr.startup(connectors.value.map(c => "quasar_" + c).toList)
+    }).value,
+    cconfig := {
+       ContainerMgr.setup
+    },
+    test in Test := {
+      val x = spinup.value
+      val y = cconfig.value
+    }
+  )
   .enablePlugins(AutomateHeaderPlugin)
 
-lazy val localIt = project
-  .settings(
-    test in Test := (Def.taskDyn {
-      stopAndRemoveBackends
-    }).value
-  )
+//lazy val localIt = project
+//  .settings(
+//    test in Test := (Def.taskDyn {
+//      stopAndRemoveBackend
+//    }).value
+//  )
