@@ -11,6 +11,9 @@ import com.github.dockerjava.core.command.BuildImageResultCallback
 import java.lang.String
 import java.lang.Integer
 import scala.Int
+import scala.Option
+import scala.Some
+import scala.None
 
 object ContainerMgr {
   // TODO: configure this without hard coding these values
@@ -176,20 +179,20 @@ object ContainerMgr {
     * @return
     */
   // TODO: figure out dockerfile path without hardcoding them
-  def start(container: String): StartContainerCmd = {
+  def start(container: String): Option[StartContainerCmd] = {
     val dockerfile = "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"
     container match {
-      case "quasar_mongodb_2_6" => startContainer(createMongoQuasarContainer(List(27018), "quasar_mongodb_2_6", "tutum/mongodb:2.6"))
-      case "quasar_mongodb_3_0" => startContainer(createMongoQuasarContainer(List(27019), "quasar_mongodb_3_0", "mongo:3.0"))
-      case "quasar_mongodb_read_only" => startContainer(createMongoQuasarContainer(List(27020), "quasar_mongodb_read_only", "mongo:3.0"))
-      case "quasar_mongodb_3_2" => startContainer(createMongoQuasarContainer(List(27021), "quasar_mongodb_3_2", "mongo:3.2"))
-      case "quasar_mongodb_3_4" => startContainer(createMongoQuasarContainer(List(27022), "quasar_mongodb_3_4", "mongo:3.4"))
-      case "quasar_metastore" => startContainer(createPostgresqlQuasarContainer(List(5432), "quasar_metastore", "postgres:9.6"))
-      case "quasar_postgresql" => startContainer(createPostgresqlQuasarContainer(List(5433), "quasar_postgresql", "postgres:9.6"))
-      case "quasar_couchbase" => startContainer(createCouchbaseQuasarContainer(List(8091, 8092, 8093, 8094, 11210), "quasar_couchbase", "couchbase/server:enterprise-4.5.1"))
-      case "quasar_marklogic_xml" => startContainer(createMarklogicQuasarContainer(List(8000, 8001, 8002), "quasar_marklogic_xml", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"))
-      case "quasar_marklogic_json" => startContainer(createMarklogicQuasarContainer(List(9000, 9001, 9002), "quasar_marklogic_json", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile"))
-      //case _ => "not gonna do anything"
+      case "quasar_mongodb_2_6" => Some(startContainer(createMongoQuasarContainer(List(27018), "quasar_mongodb_2_6", "tutum/mongodb:2.6")))
+      case "quasar_mongodb_3_0" => Some(startContainer(createMongoQuasarContainer(List(27019), "quasar_mongodb_3_0", "mongo:3.0")))
+      case "quasar_mongodb_read_only" => Some(startContainer(createMongoQuasarContainer(List(27020), "quasar_mongodb_read_only", "mongo:3.0")))
+      case "quasar_mongodb_3_2" => Some(startContainer(createMongoQuasarContainer(List(27021), "quasar_mongodb_3_2", "mongo:3.2")))
+      case "quasar_mongodb_3_4" => Some(startContainer(createMongoQuasarContainer(List(27022), "quasar_mongodb_3_4", "mongo:3.4")))
+      case "quasar_metastore" => Some(startContainer(createPostgresqlQuasarContainer(List(5432), "quasar_metastore", "postgres:9.6")))
+      case "quasar_postgresql" => Some(startContainer(createPostgresqlQuasarContainer(List(5433), "quasar_postgresql", "postgres:9.6")))
+      case "quasar_couchbase" => Some(startContainer(createCouchbaseQuasarContainer(List(8091, 8092, 8093, 8094, 11210), "quasar_couchbase", "couchbase/server:enterprise-4.5.1")))
+      case "quasar_marklogic_xml" => Some(startContainer(createMarklogicQuasarContainer(List(8000, 8001, 8002), "quasar_marklogic_xml", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile")))
+      case "quasar_marklogic_json" => Some(startContainer(createMarklogicQuasarContainer(List(9000, 9001, 9002), "quasar_marklogic_json", "/Users/nicandroflores/Documents/github/quasar/docker/Dockerfiles/Marklogic/MarkLogic-Dockerfile")))
+      case _ => None
     }
   }
 
@@ -205,20 +208,22 @@ object ContainerMgr {
 
   val myQuasarContainers = List("quasar_mongodb_read_only", "quasar_metastore", "quasar_marklogic_xml")
 
-  def startup(containers: List[String]) = {
-    containers.map(start(_).exec())
+  def startup(containers: List[String]): List[java.lang.Void] = {
+    containers.map(start(_)).flatten.map(_.exec())
   }
 
-  def setup = {
+  def setup: String = {
     configureContainers
     assembleTestingConf
   }
 
-  def stop = {
+  def stop: List[java.lang.Void] = {
     getContainers.map(stopContainer(_).exec())
   }
 
-  def cleanup = {
+  def cleanup: List[java.lang.Void] = {
     getContainers.map(deleteContainer(_).exec())
   }
+
+
 }

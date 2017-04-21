@@ -464,17 +464,36 @@ lazy val web = project
 lazy val itWithBackend = taskKey[Unit]("start backend, integration test, and then stop backend")
 
 
-val spinup = taskKey[List[java.lang.Void]]("Start backend containers")
-val cconfig = taskKey[String]("Setup backend containers")
-val cstop = taskKey[List[java.lang.Void]]("Stop backend containers")
-val ccleanup = taskKey[List[java.lang.Void]]("Clean up backend containers")
+val startContainers = taskKey[List[java.lang.Void]]("Start backend containers")
+val configContainers = taskKey[String]("Setup backend containers")
+val stopContainers = taskKey[List[java.lang.Void]]("Stop backend containers")
+val cleanupContainers = taskKey[List[java.lang.Void]]("Clean up backend containers")
+val startAndConfigure = taskKey[Unit]("Start and configure containers")
+val stopAndDelete = taskKey[Unit]("Stop and delete containers")
 
-cstop := {
+startContainers := {
+  ContainerMgr.startup(connectors.value.map(c => "quasar_" + c).toList)
+}
+configContainers := {
+  val start = startContainers.value
+  ContainerMgr.setup
+}
+stopContainers := {
   ContainerMgr.stop
 }
-
-ccleanup := {
+cleanupContainers := {
+  val stop = stopContainers.value
   ContainerMgr.cleanup
+}
+
+startAndConfigure := {
+ val s = startContainers.value
+ val c = configContainers.value 
+}
+
+stopAndDelete := {
+  val s = stopContainers.value
+  val c = cleanupContainers.value
 }
 
 lazy val it = project
@@ -489,16 +508,10 @@ lazy val it = project
   .settings(inConfig(ExclusiveTests)(exclusiveTasks(test, testOnly, testQuick)): _*)
   .settings(parallelExecution in Test := false)
   .settings(
-    spinup := (Def.taskDyn {
-       ContainerMgr.startup(connectors.value.map(c => "quasar_" + c).toList)
-    }).value,
-    cconfig := {
-       ContainerMgr.setup
-    },
-    test in Test := {
-      val x = spinup.value
-      val y = cconfig.value
-    }
+    test in Test := (Def.taskDyn {
+      val sc = startAndConfigure.value
+      stopAndDelete
+    }).value
   )
   .enablePlugins(AutomateHeaderPlugin)
 
