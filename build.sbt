@@ -95,12 +95,6 @@ connectors := {
   getConnectorNames(cfg)
 }
 
-//val hello = taskKey[Unit]("Print connector list")
-//hello := {
-//    connectors.value
-//    ()
-//}
-
 // In Travis, the processor count is reported as 32, but only ~2 cores are
 // actually available to run.
 concurrentRestrictions in Global := {
@@ -508,9 +502,12 @@ lazy val it = project
   .settings(inConfig(ExclusiveTests)(exclusiveTasks(test, testOnly, testQuick)): _*)
   .settings(parallelExecution in Test := false)
   .settings(
-    test in Test := (Def.taskDyn {
-      val sc = startAndConfigure.value
-      stopAndDelete
+    test in Test := (Def taskDyn {
+      startAndConfigure.value
+      val back = test.value
+      stopAndDelete.value
+
+      Def.task(back)
     }).value
   )
   .enablePlugins(AutomateHeaderPlugin)
