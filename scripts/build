@@ -17,16 +17,14 @@ source "$(dirname $0)/constants"
 #        more frequently than Travis's 10 minute imposed window
 TRAVIS_MAX_CONNECTOR_COMPILE_MINS=40
 TRAVIS_MAX_DOC_MINS=20
+COVERAGE=coverage
+COVERAGE_REPORT=coverageReport
 
 # if we're building a pull request, DON'T clean and use the cache instead
 if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
   CLEAN=clean
-  COVERAGE=coverage
-  COVERAGE_REPORT=coverageReport
 else
   CLEAN=
-  COVERAGE=
-  COVERAGE_REPORT=
 fi
 
 # only do code coverage on job .1 AND on a non-pull request
