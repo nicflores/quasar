@@ -156,7 +156,8 @@ ProguardKeys.inputs in Proguard := Seq(baseDirectory.value / ".targets/web" / "s
 ProguardKeys.libraries in Proguard := Seq()
 ProguardKeys.inputFilter in Proguard := { file => None }
 ProguardKeys.merge in Proguard := false
-inConfig(Proguard)(javaOptions in ProguardKeys.proguard := Seq("-Xmx2g"))
+ProguardKeys.proguardVersion in Proguard := "5.3.3"
+inConfig(Proguard)(javaOptions in ProguardKeys.proguard := Seq("-Xmx4g"))
 
 //(ProguardKeys.proguard in Proguard) := (ProguardKeys.proguard in Proguard).dependsOn(assembly)
 
