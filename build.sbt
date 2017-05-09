@@ -149,6 +149,18 @@ lazy val isIsolatedEnv           = settingKey[Boolean]("True if running in an is
 lazy val exclusiveTestTag        = settingKey[String]("Tag for exclusive execution tests")
 lazy val sparkDependencyProvided = settingKey[Boolean]("Whether or not the spark dependency should be marked as provided. If building for use in a Spark cluster, one would set this to true otherwise setting it to false will allow you to run the assembly jar on it's own")
 
+// proguard settings
+
+proguardSettings
+ProguardKeys.inputs in Proguard := Seq(baseDirectory.value / ".targets/web" / "scala-2.11" / "quasar-web-assembly-17.0.0.jar")
+ProguardKeys.libraries in Proguard := Seq()
+ProguardKeys.inputFilter in Proguard := { file => None }
+ProguardKeys.merge in Proguard := false
+inConfig(Proguard)(javaOptions in ProguardKeys.proguard := Seq("-Xmx2g"))
+
+//(ProguardKeys.proguard in Proguard) := (ProguardKeys.proguard in Proguard).dependsOn(assembly)
+
+
 lazy val root = project.in(file("."))
   .settings(commonSettings)
   .settings(noPublishSettings)
