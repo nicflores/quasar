@@ -152,12 +152,22 @@ lazy val sparkDependencyProvided = settingKey[Boolean]("Whether or not the spark
 // proguard settings
 
 proguardSettings
+ProguardKeys.options in Proguard ++= Seq("-dontnote", "-dontwarn", "-ignorewarnings")
 ProguardKeys.inputs in Proguard := Seq(baseDirectory.value / ".targets/web" / "scala-2.11" / "quasar-web-assembly-17.0.0.jar")
 ProguardKeys.libraries in Proguard := Seq()
 ProguardKeys.inputFilter in Proguard := { file => None }
 ProguardKeys.merge in Proguard := false
 ProguardKeys.proguardVersion in Proguard := "5.3.3"
 inConfig(Proguard)(javaOptions in ProguardKeys.proguard := Seq("-Xmx4g"))
+val keepClasses =
+  """
+   |-keepparameternames
+   |-keepattributes Exceptions,InnerClasses,Signature,Deprecated,
+   |                SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+   |
+   |-keep public class quasar.server
+  """.stripMargin
+ProguardKeys.options in Proguard += keepClasses
 
 //(ProguardKeys.proguard in Proguard) := (ProguardKeys.proguard in Proguard).dependsOn(assembly)
 
