@@ -158,6 +158,7 @@ ProguardKeys.libraries in Proguard := Seq()
 ProguardKeys.inputFilter in Proguard := { file => None }
 ProguardKeys.merge in Proguard := false
 ProguardKeys.proguardVersion in Proguard := "5.3.3"
+//ProguardKeys.options in Proguard ++= Seq(ProguardOptions.keepMain("quasar.server.Server"))
 inConfig(Proguard)(javaOptions in ProguardKeys.proguard := Seq("-Xmx4g"))
 val keepClasses =
   """
@@ -165,8 +166,10 @@ val keepClasses =
    |-keepattributes Exceptions,InnerClasses,Signature,Deprecated,
    |                SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
    |
-   |-keep public class quasar.server
-  """.stripMargin
+   |-keep public class quasar.server.Server {
+   |    main(scala.lang.Array[scala.lang.String]);
+   |}
+   """.stripMargin
 ProguardKeys.options in Proguard += keepClasses
 
 //(ProguardKeys.proguard in Proguard) := (ProguardKeys.proguard in Proguard).dependsOn(assembly)
