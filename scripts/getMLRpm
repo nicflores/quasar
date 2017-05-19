@@ -18,7 +18,7 @@ ML_DIR="$HOME/marklogic"
 ML_RPM_PATH="$ML_DIR/MarkLogic.rpm"
 ML_RPM_SHA1="$ML_DIR/MarkLogic.rpm.sha1"
 
-echo "48cfbd30d003547feb6b60e120abd4542e8b83f9  /tmp/MarkLogic.rpm" > /tmp/MarkLogic.rpm.sha1
+echo "48cfbd30d003547feb6b60e120abd4542e8b83f9  /tmp/MarkLogic.rpm" > $ML_RPM_SHA1
 
 curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
 curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
