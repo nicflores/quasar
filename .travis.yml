@@ -13,8 +13,7 @@ before_install:
   - sudo /etc/init.d/postgresql stop
   - cd $TRAVIS_BUILD_DIR/scripts
   - ./getMLRpm
-  - echo $HOME
-  - ls $HOME/marklogic
+  - ls $HOME/.marklogic
  
 # create all the docker containers we need for IT testing
 install:
