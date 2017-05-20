@@ -23,10 +23,14 @@ then
 
   echo "48cfbd30d003547feb6b60e120abd4542e8b83f9  $ML_RPM_PATH" > $ML_RPM_SHA1
 
-  curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
-  curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
-  cat /tmp/json | cut -f 3 -d: | cut -c2- | rev | cut -c3- | rev > /tmp/url
-  curl -o $ML_RPM_PATH -m 2000 "${ML_DEV_URL}$(cat /tmp/url)"
-  shasum --status -c $ML_RPM_SHA1
-
+  if [[ -e $ML_RPM_PATH ]]
+  then
+    shasum --status -c $ML_RPM_SHA1
+  else
+    curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
+    curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
+    cat /tmp/json | cut -f 3 -d: | cut -c2- | rev | cut -c3- | rev > /tmp/url
+    curl -o $ML_RPM_PATH -m 2000 "${ML_DEV_URL}$(cat /tmp/url)"
+    shasum --status -c $ML_RPM_SHA1
+  fi
 fi
