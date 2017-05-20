@@ -26,8 +26,6 @@ ADD $HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
 #RUN curl -o $ML_RPM_PATH -m 4000 "${ML_DEV_URL}$(cat /tmp/url)"
 #RUN cd /tmp && sha1sum --status -c $ML_RPM_SHA1
 
-RUN mkdir /tmp/marklogic
-VOLUME /tmp/marklogic
 RUN yum -y localinstall /tmp/marklogic/MarkLogic.rpm
 
 EXPOSE 7997 7998 7999 8000 8001 8002 8040 8041 8042
