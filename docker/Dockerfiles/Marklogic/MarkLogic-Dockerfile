@@ -1,8 +1,6 @@
 FROM patrickmcelwee/marklogic-dependencies:8-latest
 
-<<<<<<< HEAD
 ADD $HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
-=======
 # Downlaod MarkLogic
 #ENV ML_VERSION="8.0-5.8"
 #ENV ML_DEV_URL="https://developer.marklogic.com"
@@ -21,7 +19,12 @@ ADD $HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
 #ENV ML_CNT_NAME="ml8"
 
 ADD $TRAVIS_HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
->>>>>>> passing in travis home env var to dockerfile
+
+#RUN curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
+#RUN curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
+#RUN cat /tmp/json | cut -f 3 -d: | cut -c2- | rev | cut -c3- | rev > /tmp/url
+#RUN curl -o $ML_RPM_PATH -m 4000 "${ML_DEV_URL}$(cat /tmp/url)"
+#RUN cd /tmp && sha1sum --status -c $ML_RPM_SHA1
 
 RUN yum -y localinstall /tmp/MarkLogic.rpm
 RUN rm -rf /tmp/url /tmp/json /tmp/MarkLogic*
