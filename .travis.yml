@@ -58,7 +58,7 @@ branches:
 
 cache:
   directories:
-    - $HOME/marklogic
+    - docker/Dockerfile/marklogic
     - $HOME/.coursier/cache
     - $HOME/.ivy2/cache
     - $HOME/.sbt
