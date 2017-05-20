@@ -22,7 +22,8 @@ then
   ML_RPM_SHA1="$ML_DIR/MarkLogic.rpm.sha1"
 
   echo "48cfbd30d003547feb6b60e120abd4542e8b83f9  $ML_RPM_PATH" > $ML_RPM_SHA1
-
+  echo "ML_RPM_PATH: $ML_RPM_PATH"
+  ls -al $ML_RPM_PATH
   if [ ! -f $ML_RPM_PATH ]
   then
     curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN

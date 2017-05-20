@@ -18,7 +18,7 @@ ADD $HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
 #ENV ML_IMG_NAME="marklogic:${ML_VERSION}"
 #ENV ML_CNT_NAME="ml8"
 
-ADD $TRAVIS_HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
+ADD ${TRAVIS_HOME}/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
 
 #RUN curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
 #RUN curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
