@@ -51,8 +51,6 @@ quasar_marklogic_xml:
   container_name: quasar_marklogic_xml
   build: ./Dockerfiles/Marklogic
   dockerfile: MarkLogic-Dockerfile
-  volumes:
-    - ./home/travis/marklogic:/tmp/
   ports:
     - "8000-8002:8000-8002"
   mem_limit: 2048m
