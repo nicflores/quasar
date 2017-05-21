@@ -25,12 +25,14 @@ then
 
   if [ ! -f $HOME/.marklogic/MarkLogic.rpm ]
   then
+    echo "Didn't find MarkLogic.rpm in cache, downloading ..."
     curl -X POST --data "email=${ML_DOWNLOAD_EMAIL}&password=${ML_DOWNLOAD_PASSWORD}" -c $ML_DEV_COOKIES $ML_DEV_LOGIN
     curl -X POST --data "download=$ML_ASSET_PATH" -b $ML_DEV_COOKIES $ML_DEV_GET_TOKEN > /tmp/json
     cat /tmp/json | cut -f 3 -d: | cut -c2- | rev | cut -c3- | rev > /tmp/url
     curl -o $ML_RPM_PATH -m 2000 "${ML_DEV_URL}$(cat /tmp/url)"
     cp $ML_RPM_PATH $HOME/.marklogic/MarkLogic.rpm
   else
+    echo "Found MarkLogic.rpm in cache ..."
     cp $HOME/.marklogic/MarkLogic.rpm $ML_RPM_PATH
   fi
 
