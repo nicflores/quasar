@@ -41,6 +41,7 @@ then
     else
       echo "Found MarkLogic.rpm in cache ..."
       cp $HOME/.marklogic/MarkLogic.rpm $ML_RPM_PATH
+      ls -al $HOME/.marklogic/
     fi
   fi
     shasum --status -c $ML_RPM_SHA1
