@@ -113,8 +113,10 @@ configure_all_live_containers() {
 create_database() {
   if [[ ${TRAVIS:-} ]]
   then
+    echo "create_database in Travis: ${TRAVIS}"
     if [[ $1 =~ "marklogic" ]]
     then
+      echo "running getMLRpm..."
       $(dirname $0)/../Dockerfiles/Marklogic/getMLRpm
     fi
     docker-compose -f $(dirname $0)/../docker-compose.yml up -d $1
