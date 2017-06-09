@@ -7,8 +7,19 @@ CONTAINER=$1
 if [[ $CONTAINER == "quasar_spark_local_test" ]]
 then
     echo "$CONTAINER: not starting a container for spark_local_test..."
-else
-  cd $TRAVIS_BUILD_DIR
+elif [[ $CONTAINER =~ "quasar_marklogic" ]]
+then
+  $(dirname $0)/../Dockerfiles/Marklogic/getMLRpm
   docker-compose -f ./docker/docker-compose.yml up -d $CONTAINER
   sleep 5
+else
+  if [[ ${TRAVIS:-} ]]
+  then
+    cd $TRAVIS_BUILD_DIR
+    docker-compose -f ./docker/docker-compose.yml up -d $CONTAINER
+    sleep 5
+  else
+    docker-compose -f ./docker/docker-compose.yml up -d $CONTAINER
+    sleep 5
+  fi
 fi
