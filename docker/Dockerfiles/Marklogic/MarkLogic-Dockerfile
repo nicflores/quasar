@@ -1,6 +1,5 @@
 FROM patrickmcelwee/marklogic-dependencies:8-latest
 
-ADD $HOME/marklogic/MarkLogic.rpm /tmp/MarkLogic.rpm
 # Downlaod MarkLogic
 #ENV ML_VERSION="8.0-5.8"
 #ENV ML_DEV_URL="https://developer.marklogic.com"
