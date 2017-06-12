@@ -5,13 +5,13 @@ IFS=$'\n\t'       # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 function downloadMLRPM() {
   if [[ $1 =~ "marklogic" ]]
   then
-    ./docker/Dockerfiles/Marklogic/getMLRpm
+    docker/Dockerfiles/Marklogic/getMLRpm
   fi
 }
 
 function upContainer() {
   echo "pwd: $(pwd)"
-  docker-compose -f ./docker/docker-compose.yml up -d $1
+  docker-compose -f docker/docker-compose.yml up -d $1
 }
 
 CONTAINER=$1
