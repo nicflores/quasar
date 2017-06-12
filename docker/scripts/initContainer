@@ -17,14 +17,12 @@ CONTAINER=$1
 if [[ $CONTAINER == "quasar_spark_local_test" ]]
 then
   echo "$CONTAINER: not starting a container for spark_local_test..."
+elif [[ $CONTAINER =~ "marklogic" ]]
+then
+  downloadMLRPM $CONTAINER
+  upContainer $CONTAINER
+  sleep 5
 else
-  if [[ $CONTAINER =~ "marklogic" ]]
-  then
-    downloadMLRPM $CONTAINER
-    upContainer $CONTAINER
-    sleep 5
-  else
-    upContainer $CONTAINER
-    sleep 5
-  fi
+  upContainer $CONTAINER
+  sleep 5
 fi
