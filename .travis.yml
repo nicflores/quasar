@@ -16,7 +16,7 @@ before_install:
 install:
   - docker/scripts/initContainer quasar_metastore
   - docker/scripts/initContainer quasar_$CONNECTOR
-  - docker-compose ps
+  - docker-compose -f docker/docker-comppose.yml ps
 
 # run db config scripts and populate the it/testing.conf file
 before_script:
