@@ -49,19 +49,21 @@ init_marklogic() {
   $SCRIPTS_DIR/initMarklogic $1 $2 $3 $4
 }
 
+
 ##########################################
 # parse arguments and run various
 # database configuration scripts
 #
 apply_configuration() {
   CONTAINER=$1
-  if [[ $CONTAINER == "quasar_mongodb_read_only" ]]; then init_mongo;                                  fi
-  if [[ $CONTAINER == "quasar_couchbase"         ]]; then init_couchbase;                              fi
-  if [[ $CONTAINER == "quasar_marklogic_xml"     ]]; then init_marklogic $DOCKERIP 8001 8002 enabled;  fi
-  if [[ $CONTAINER == "quasar_marklogic_json"    ]]; then init_marklogic $DOCKERIP 9001 9002 disabled; fi
-  if [[ $CONTAINER == "quasar_postgresql"        ]]; then init_postgresql;                             fi
-  if [[ $CONTAINER == "quasar_metastore"         ]]; then init_metastore;                              fi
+  if [[ $CONTAINER == "quasar_mongodb_read_only"   ]]; then init_mongo;                                  fi
+  if [[ $CONTAINER == "quasar_couchbase"           ]]; then init_couchbase;                              fi
+  if [[ $CONTAINER == "quasar_marklogic_xml"       ]]; then init_marklogic $DOCKERIP 8001 8002 enabled;  fi
+  if [[ $CONTAINER == "quasar_marklogic_json"      ]]; then init_marklogic $DOCKERIP 9001 9002 disabled; fi
+  if [[ $CONTAINER == "quasar_postgresql"          ]]; then init_postgresql;                             fi
+  if [[ $CONTAINER == "quasar_metastore"           ]]; then init_metastore;                              fi
 }
+
 
 configure_containers() {
   for CONTAINER in $1
