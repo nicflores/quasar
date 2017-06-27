@@ -77,6 +77,10 @@ env:
     - CONNECTOR=mongodb_3_4
     - CONNECTOR=mongodb_read_only
     - CONNECTOR=spark_local_test
+    - CONNECTOR=spark_hdfs
+    - CONNECTOR=spark_elasticsearch
+    - CONNECTOR=spark_ftp
+    - CONNECTOR=spark_cassandra
 
   global:
     - COURSIER_PROGRESS=0

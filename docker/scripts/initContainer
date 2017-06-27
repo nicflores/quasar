@@ -25,6 +25,11 @@ then
   downloadMLRPM $CONTAINER
   upContainer $CONTAINER
   sleep 5
+elif [[ $CONTAINER =~ "quasar_spark_" ]]
+then
+  upContainer quasar_spark_cluster
+  echo "will start spark connector here once they are ready"
+  #upContainer $CONTAINER
 else
   upContainer $CONTAINER
   sleep 5
