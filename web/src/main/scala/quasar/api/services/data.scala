@@ -99,7 +99,20 @@ object data {
             (format.disposition.toList: List[Header])
         QResponse.headers.modify(_ ++ headers)(QResponse.streaming(p))
       },
-      filePath => formattedDataResponse(format, R.scan(filePath, offset, limit)))
+      filePath => {
+
+        val x: Process[R.M, ByteVector] = format.encode(
+          R.scan(filePath, offset, limit)).map(
+            str => ByteVector.view(str.getBytes(StandardCharsets.UTF_8)))
+
+        val headers: List[Header] = `Content-Type`(MediaType.`application/zip`) ::
+          (format.disposition.toList: List[Header])
+
+        QResponse.headers.modify(_ ++ headers)(
+          QResponse.streaming(
+            Zip.zipFiles(
+              Map((currentDir[Sandboxed] </> file1[Sandboxed](fileName(filePath))) -> x))))
+      })
 
   private def parseDestination(dstString: String): ApiError \/ APath = {
     def absPathRequired(rf: pathy.Path[Rel, _, _]) = ApiError.fromMsg(
@@ -229,8 +242,13 @@ object data {
       } yield ()).as(QResponse.ok[S]).run.map(_.merge) // Return 200 Ok if everything goes smoothly
   }
 
+  // 1. Does it make sense to make this more general in order to have it zip both directories
+  // and files?
+  // 2. Maybe instead of AbsDir use Path?
+  //  a. If Path is an AbsDir do what we do now
+  //  b. If Path is an AbsFile zip the file
   private def zippedContents[S[_]](
-    dir: AbsDir[Sandboxed],
+    dir: AbsDir[Sandboxed], // path: Path[Abs, File, S] \/ Path[Abs, Dir, S]
     format: MessageFormat,
     offset: Natural,
     limit: Option[Positive]
