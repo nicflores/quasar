@@ -118,10 +118,10 @@ quasar_ftp:
   container_name: quasar_ftp
   image: stilliard/pure-ftpd:hardened
   ports:
-    - 21:21
-    - 30000-30009:30000-30009
+    - "21:21"
+    - "30000-30009:30000-30009"
   environment:
-    - PUBLICHOST=192.168.99.100
-  #volumes:
-  #  - /tmp:/home/vsftpd
+    - PUBLICHOST=0.0.0.0
+  volumes:
+    - ./Dockerfiles/FTP:/etc/pure-ftpd/passwd
 
