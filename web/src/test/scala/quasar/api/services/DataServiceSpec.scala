@@ -300,7 +300,6 @@ class DataServiceSpec extends quasar.Qspec with FileSystemFixture with Http4s {
             response.status must_=== Status.Ok
           }
           "zipped via request headers" >> {
-            val disposition = `Content-Disposition`("attachment", Map("filename*" -> "UTF-8''foo.json.zip"))
             val sampleFile = rootDir[Sandboxed] </> file("foo")
             val data = Vector(Data.Obj("a" -> Data.Str("bar"), "b" -> Data.Bool(true)))
             val request = Request(uri = pathUri(sampleFile).+?("request-headers", s"""{"Accept-Encoding":"gzip","Accept":"application/zip,application/json"}"""))
