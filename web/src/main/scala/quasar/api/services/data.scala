@@ -106,7 +106,6 @@ object data {
           val headers: List[Header] = `Content-Type`(MediaType.`application/zip`) :: (format.disposition.toList: List[Header])
           val p: Process[R.M, ByteVector] = format.encode(R.scan(filePath, offset, limit)).map(str => ByteVector.view(str.getBytes(StandardCharsets.UTF_8)))
           val f: RelFile[Sandboxed] = currentDir[Sandboxed] </> file1[Sandboxed](fileName(filePath))
-          println(f.toString)
           val z: Process[R.M, ByteVector] = Zip.zipFiles(Map(f -> p))
           QResponse.headers.modify(_ ++ headers)(QResponse.streaming(z))
         }
