@@ -12,7 +12,10 @@ services:
 before_install:
   - sudo /etc/init.d/postgresql stop
   - docker-compose version
- 
+  - docker network create -d bridge --subnet 192.168.0.0/24 --gateway 192.168.0.1 dockernet
+  - cd $TRAVIS_BUILD_DIR/docker
+  - docker-compose up -d quasar_spark_cluster
+  - exit 1
 # create all the docker containers we need for IT testing
 install:
   - docker/scripts/initContainer quasar_metastore
