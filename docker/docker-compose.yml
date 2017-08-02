@@ -84,8 +84,7 @@ services:
       - "8081:8080"
       - "7077:7077"
       - "6066:6066"
-    networks:
-      - dockernet
+
   quasar_elasticsearch:
     container_name: quasar_elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
@@ -142,7 +141,3 @@ services:
       - 50070:50070
       - 50075:50075
       - 50090:50090
-
-networks:
-  dockernet:
-    external: true
