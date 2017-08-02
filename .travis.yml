@@ -13,10 +13,11 @@ before_install:
   - sudo /etc/init.d/postgresql stop
   - cd $TRAVIS_BUILD_DIR/docker
   - docker-compose up -d quasar_spark_cluster
-  - slpee 3
+  - sleep 5
   - docker-compose up -d quasar_cassandra
-  - slpee 3
+  - sleep 5
   - docker-compose up -d quasar_hadoop
+  - sleep 5
   - docker ps -a
   - docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_spark_cluster
   - docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_cassandra
