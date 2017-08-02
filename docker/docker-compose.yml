@@ -51,16 +51,18 @@ services:
 
   quasar_marklogic_xml:
     container_name: quasar_marklogic_xml
-    build: ./Dockerfiles/Marklogic
-    dockerfile: MarkLogic-Dockerfile
+    build:
+      context: ./Dockerfiles/Marklogic
+      dockerfile: MarkLogic-Dockerfile
     ports:
       - "8000-8002:8000-8002"
     mem_limit: 2048m
 
   quasar_marklogic_json:
     container_name: quasar_marklogic_json
-    build: ./Dockerfiles/Marklogic
-    dockerfile: MarkLogic-Dockerfile
+    build:
+      context: ./Dockerfiles/Marklogic
+      dockerfile: MarkLogic-Dockerfile
     ports:
       - "9000-9002:8000-8002"
     mem_limit: 2048m
@@ -75,8 +77,9 @@ services:
 
   quasar_spark_cluster:
     container_name: spark
-    build: ./Dockerfiles/Spark
-    dockerfile: Spark-Dockerfile
+    build:
+      context: ./Dockerfiles/Spark
+      dockerfile: Spark-Dockerfile
     ports:
       - "8081:8080"
       - "7077:7077"
