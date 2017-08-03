@@ -61,7 +61,6 @@ configure_postgresql() {
   echo "$CONTAINERNAME=\"jdbc:postgresql://${DOCKERIP}:5433/quasar-test?user=postgres&password=postgres\"" >> $CONFIGFILE
 }
 
-spark://IP:PORT
 configure_spark_connector() {
   CONTAINERNAME=$1
   CONNECTORIPADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_$1)
