@@ -131,8 +131,8 @@ services:
     volumes:
       - ./Dockerfiles/FTP:/etc/pure-ftpd/passwd
   
-  quasar_hadoop:
-    container_name: quasar_hadoop
+  quasar_hdfs:
+    container_name: quasar_hdfs
     image: harisekhon/hadoop
     ports:
       - 8042:8042
