@@ -11,23 +11,6 @@ services:
 # needed by the  postgreql container
 before_install:
   - sudo /etc/init.d/postgresql stop
-  - cd $TRAVIS_BUILD_DIR/docker
-  - docker-compose up -d quasar_spark_cluster
-  - sleep 5
-  - docker-compose up -d quasar_cassandra
-  - sleep 5
-  - docker-compose up -d quasar_hadoop
-  - sleep 5
-  - docker ps -a
-  - export SPAR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_spark_cluster)
-  - export CASS=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_cassandra)
-  - export HADO=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_hadoop)
-  - docker exec -it quasar_spark_cluster ping -c 3 $CASS
-  - docker exec -it quasar_spark_cluster ping -c 3 $HADO
-  - ping -c 3 $SPAR
-  - ping -c 3 $CASS
-  - ping -c 3 $HADO
-  - exit 1
 
 # create all the docker containers we need for IT testing
 install:

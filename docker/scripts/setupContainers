@@ -49,6 +49,11 @@ init_marklogic() {
   $SCRIPTS_DIR/initMarklogic $1 $2 $3 $4
 }
 
+init_spark_connector() {
+  # Just in case we have to configure
+  # the spark companion connectors
+}
+
 
 ##########################################
 # parse arguments and run various
@@ -62,6 +67,10 @@ apply_configuration() {
   if [[ $CONTAINER == "quasar_marklogic_json"      ]]; then init_marklogic $DOCKERIP 9001 9002 disabled; fi
   if [[ $CONTAINER == "quasar_postgresql"          ]]; then init_postgresql;                             fi
   if [[ $CONTAINER == "quasar_metastore"           ]]; then init_metastore;                              fi
+  if [[ $CONTAINER == "quasar_cassandra"           ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_elasticsearch"       ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_hadoop"              ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_ftp"                 ]]; then init_spark_connector;                        fi
 }
 
 
