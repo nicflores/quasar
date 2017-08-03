@@ -90,10 +90,10 @@ container_lookup() {
   if [[ $CONTAINER == "postgresql"       ]]; then configure_postgresql     $CONTAINER;      fi
   if [[ $CONTAINER == "marklogic_xml"    ]]; then configure_marklogic_xml  $CONTAINER 8001; fi
   if [[ $CONTAINER == "marklogic_json"   ]]; then configure_marklogic_json $CONTAINER 9001; fi
-  if [[ $CONTAINER == "couchbase"        ]]; then configure_couchbase;      fi
-  if [[ $CONTAINER == "spark_local_test" ]]; then configure_spark;      fi
-  if [[ $CONTAINER == "metastore"        ]]; then configure_metastore;      fi
-  if [[ $CONTAINER == "mimir"            ]]; then configure_mimir;      fi
+  if [[ $CONTAINER == "couchbase"        ]]; then configure_couchbase      $CONTAINER;      fi
+  if [[ $CONTAINER == "spark_local_test" ]]; then configure_spark;                          fi
+  if [[ $CONTAINER == "metastore"        ]]; then configure_metastore;                      fi
+  if [[ $CONTAINER == "mimir"            ]]; then configure_mimir;                          fi
   if [[ $CONTAINER == "cassandra" || $CONTAINER == "elasticsearch" || $CONTAINER == "ftp" || $CONTAINER == "hdfs" ]]; then configure_spark_connector $CONTAINER; fi
 }
 
