@@ -25,7 +25,7 @@ then
   downloadMLRPM $CONTAINER
   upContainer $CONTAINER
   sleep 5
-elif [[ $CONTAINER == "quasar_cassandra" || $CONTAINER == "quasar_hadoop" || $CONTAINER == "quasar_ftp" || $CONTAINER == "quasar_elasticsearch"]]
+elif ([[ $CONTAINER == "quasar_cassandra" ]] || [[ $CONTAINER == "quasar_hdfs" ]] || [[ $CONTAINER == "quasar_ftp" ]] || [[ $CONTAINER == "quasar_elasticsearch" ]])
 then
   upContainer quasar_spark_cluster
   upContainer $CONTAINER

@@ -67,7 +67,7 @@ configure_spark_connector() {
   if [[ $CONTAINERNAME == "cassandra"     ]]; then echo "$CONTAINERNAME=\"http://${DOCKERIPADDR}:9042\"" >> $CONFIGFILE; fi
   if [[ $CONTAINERNAME == "elasticsearch" ]]; then echo "$CONTAINERNAME=\"http://${DOCKERIPADDR}:9200\"" >> $CONFIGFILE; fi
   if [[ $CONTAINERNAME == "ftp"           ]]; then echo "$CONTAINERNAME=\"ftp://${DOCKERIPADDR}:21\""    >> $CONFIGFILE; fi
-  if [[ $CONTAINERNAME == "hadoop"        ]]; then echo "$CONTAINERNAME=\"hdfs://${DOCKERIPADDR}:8020\"" >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "hdfs"        ]]; then echo "$CONTAINERNAME=\"hdfs://${DOCKERIPADDR}:8020\"" >> $CONFIGFILE; fi
 }
 
 ##########################################
@@ -94,7 +94,7 @@ container_lookup() {
   if [[ $CONTAINER == "spark_local_test" ]]; then configure_spark;      fi
   if [[ $CONTAINER == "metastore"        ]]; then configure_metastore;      fi
   if [[ $CONTAINER == "mimir"            ]]; then configure_mimir;      fi
-  if [[ $CONTAINER == "cassandra" || $CONTAINER == "elasticsearch" || $CONTAINER == "ftp" || $CONTAINER == "hadoop" ]]; then configure_spark_connector $CONTAINER; fi
+  if [[ $CONTAINER == "cassandra" || $CONTAINER == "elasticsearch" || $CONTAINER == "ftp" || $CONTAINER == "hdfs" ]]; then configure_spark_connector $CONTAINER; fi
 }
 
 

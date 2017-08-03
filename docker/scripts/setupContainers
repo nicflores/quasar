@@ -52,6 +52,7 @@ init_marklogic() {
 init_spark_connector() {
   # Just in case we have to configure
   # the spark companion connectors
+  echo "nothing to configure, yet"
 }
 
 
@@ -69,7 +70,7 @@ apply_configuration() {
   if [[ $CONTAINER == "quasar_metastore"           ]]; then init_metastore;                              fi
   if [[ $CONTAINER == "quasar_cassandra"           ]]; then init_spark_connector;                        fi
   if [[ $CONTAINER == "quasar_elasticsearch"       ]]; then init_spark_connector;                        fi
-  if [[ $CONTAINER == "quasar_hadoop"              ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_hdfs"              ]]; then init_spark_connector;                        fi
   if [[ $CONTAINER == "quasar_ftp"                 ]]; then init_spark_connector;                        fi
 }
 
