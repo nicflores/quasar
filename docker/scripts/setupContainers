@@ -68,14 +68,10 @@ apply_configuration() {
   if [[ $CONTAINER == "quasar_marklogic_json"      ]]; then init_marklogic $DOCKERIP 9001 9002 disabled; fi
   if [[ $CONTAINER == "quasar_postgresql"          ]]; then init_postgresql;                             fi
   if [[ $CONTAINER == "quasar_metastore"           ]]; then init_metastore;                              fi
-  if [[ $CONTAINER == "quasar_cassandra"           ]]; then init_spark_connector;                        fi
-  if [[ $CONTAINER == "quasar_elasticsearch"       ]]; then init_spark_connector;                        fi
-<<<<<<< HEAD
-  if [[ $CONTAINER == "quasar_hdfs"                ]]; then init_hdfs;                                   fi
-=======
-  if [[ $CONTAINER == "quasar_hdfs"              ]]; then init_spark_connector;                        fi
->>>>>>> 9e3c86b671fcca00d09682c5479ad306f80ebc11
-  if [[ $CONTAINER == "quasar_ftp"                 ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_spark_cassandra"     ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_spark_elasticsearch" ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_spark_hdfs"          ]]; then init_hdfs;                                   fi
+  if [[ $CONTAINER == "quasar_spark_ftp"           ]]; then init_spark_connector;                        fi
 }
 
 

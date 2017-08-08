@@ -87,7 +87,7 @@ services:
     #networks:
     #  - dockernet
 
-  quasar_elasticsearch:
+  quasar_spark_elasticsearch:
     container_name: quasar_elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
     ports:
@@ -108,7 +108,7 @@ services:
     #networks:
     #  - esnet
   
-  quasar_cassandra:
+  quasar_spark_cassandra:
     container_name: quasar_cassandra
     image: cassandra:3.11
     #command: /bin/bash -c "sleep 30 && echo ' -- Pausing to let system catch up ... -->' && /docker-entrypoint.sh cassandra -f"
@@ -120,7 +120,7 @@ services:
     # volumes:
     #   - ./data/cassandra-1:/var/lib/cassandra:rw
   
-  quasar_ftp:
+  quasar_spark_ftp:
     container_name: quasar_ftp
     image: stilliard/pure-ftpd:hardened
     ports:
@@ -131,7 +131,7 @@ services:
     volumes:
       - ./Dockerfiles/FTP:/etc/pure-ftpd/passwd
   
-  quasar_hdfs:
+  quasar_spark_hdfs:
     container_name: quasar_hdfs
     image: harisekhon/hadoop
     ports:
@@ -143,7 +143,3 @@ services:
       - 50070:50070
       - 50075:50075
       - 50090:50090
- 
-#networks:
-#  dockernet:
-#    external: true

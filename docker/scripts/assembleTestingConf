@@ -66,10 +66,11 @@ configure_spark_connector() {
   CONNECTORIPADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_$1)
   SPARKCLUSTERIPADDR=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_spark_cluster)
   echo "spark_master=\"spark://${SPARKCLUSTERIPADDR}:7077\"" >> $CONFIGFILE
-  if [[ $CONTAINERNAME == "cassandra"     ]]; then echo "spark_cassandra=\"http://${CONNECTORIPADDR}:9042\"" >> $CONFIGFILE; fi
-  if [[ $CONTAINERNAME == "elasticsearch" ]]; then echo "spark_elastic=\"http://${CONNECTORIPADDR}:9200\""  >> $CONFIGFILE; fi
-  if [[ $CONTAINERNAME == "ftp"           ]]; then echo "spark_ftp=\"ftp://${CONNECTORIPADDR}:21\""         >> $CONFIGFILE; fi
-  if [[ $CONTAINERNAME == "hdfs"          ]]; then echo "spark_hdfs=\"hdfs://${CONNECTORIPADDR}:8020\""     >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_cassandra"     ]]; then echo "spark_cassandra=\"http://${CONNECTORIPADDR}:9042\"" >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_elasticsearch" ]]; then echo "spark_elastic=\"http://${CONNECTORIPADDR}:9200\""   >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_ftp"           ]]; then echo "spark_ftp=\"ftp://${CONNECTORIPADDR}:21\""          >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_hdfs"          ]]; then echo "spark_hdfs=\"hdfs://${CONNECTORIPADDR}:8020\""      >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_s3"            ]]; then echo "spark_s3=\"s3://sparkurl\""                         >> $CONFIGFILE; fi
 }
 
 ##########################################
@@ -95,7 +96,7 @@ container_lookup() {
   if [[ $CONTAINER == "spark_local_test" ]]; then configure_spark;                          fi
   if [[ $CONTAINER == "metastore"        ]]; then configure_metastore;                      fi
   if [[ $CONTAINER == "mimir"            ]]; then configure_mimir;                          fi
-  if [[ $CONTAINER == "cassandra" || $CONTAINER == "elasticsearch" || $CONTAINER == "ftp" || $CONTAINER == "hdfs" ]]; then configure_spark_connector $CONTAINER; fi
+  if [[ $CONTAINER == "spark_cassandra" || $CONTAINER == "spark_elasticsearch" || $CONTAINER == "spark_ftp" || $CONTAINER == "spark_hdfs" || $CONTAINER == "spark_s3" ]]; then configure_spark_connector $CONTAINER; fi
 }
 
 
