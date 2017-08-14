@@ -71,6 +71,8 @@ services:
   quasar_spark_cluster:
     container_name: quasar_spark_cluster
     build:
+      args:
+        SPARK_VERSION: "2.2.0"
       context: ./Dockerfiles/Spark
       dockerfile: Spark-Dockerfile
     ports:
