@@ -2,7 +2,7 @@
 set -euo pipefail # STRICT MODE
 IFS=$'\n\t'       # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 
-source ${TRAVIS_BUILD_DIR}/build/constants
+source ${TRAVIS_BUILD_DIR}/scripts/constants
 
 function downloadMLRPM() {
   if [[ $1 =~ "marklogic" ]]
