@@ -61,6 +61,7 @@ init_spark_connector() {
 
 init_spark_cluster() {
   echo "running sbt command for sparkcore assembly..."
+  source ${TRAVIS_BUILD_DIR}/scripts/constants
   $SBT 'set every sparkDependencyProvided := true' sparkcore/assembly
 }
 
