@@ -59,6 +59,11 @@ init_spark_connector() {
   echo "nothing to configure, yet"
 }
 
+init_spark_cluster() {
+  echo "running sbt command for sparkcore assembly..."
+  $SBT 'set every sparkDependencyProvided := true' sparkcore/assembly
+}
+
 
 ##########################################
 # parse arguments and run various
@@ -77,6 +82,7 @@ apply_configuration() {
   if [[ $CONTAINER == "quasar_spark_elasticsearch" ]]; then init_spark_connector;                        fi
   if [[ $CONTAINER == "quasar_spark_hdfs"          ]]; then init_hdfs $CONTAINER;                        fi
   if [[ $CONTAINER == "quasar_spark_ftp"           ]]; then init_spark_connector;                        fi
+  if [[ $CONTAINER == "quasar_spark_cluster"       ]]; then init_spark_cluster;                        fi
 }
 
 
