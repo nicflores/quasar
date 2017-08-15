@@ -50,7 +50,7 @@ init_hdfs() {
   CONTAINER=$1
   echo "configuring hdfs..."
   docker exec $CONTAINER /hadoop-2.7.3/sbin/hadoop-daemon.sh start datanode
-  sleep 5
+  sleep 10
   docker exec $CONTAINER /hadoop-2.7.3/sbin/yarn-daemon.sh start nodemanager
 }
 
