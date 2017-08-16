@@ -6,11 +6,12 @@ ARG HADOOP_VERSION
 RUN apt-get update
 RUN apt-get -y install ssh
 
+COPY hadoop-${HADOOP_VERSION}.tar.gz /tmp/hadoop-${HADOOP_VERSION}.tar.gz
 
-RUN curl -L http://www-us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz | tar -xz -C /opt/
-
-# spark setup
+# hadoop setup
+RUN tar -xf /tmp/hadoop-${HADOOP_VERSION}.tar.gz -C /opt/
 RUN mv /opt/hadoop-${HADOOP_VERSION} /opt/hadoop
+RUN rm -rf /tmp/hadoop-${HADOOP_VERSION}.tar.gz
 COPY core-site.xml /opt/hadoop/etc/hadoop/
 COPY hdfs-site.xml /opt/hadoop/etc/hadoop/
 COPY slaves /opt/hadoop/etc/hadoop/
@@ -22,6 +23,7 @@ RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 RUN chmod 0600 /root/.ssh/authorized_keys
 
 RUN /opt/hadoop/bin/hdfs namenode -format
+RUN apt-get clean all
 
 EXPOSE 8030-8033 8088 9000 10020 19888 50010 50020 50070 50075 50090
 
