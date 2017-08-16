@@ -31,6 +31,13 @@ then
   docker/scripts/setupContainers -c quasar_spark_cluster
   upContainer $CONTAINER
   sleep 5
+  CONNECTORIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER)
+  SPARKCLUSTERIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' quasar_spark_cluster)
+  echo "ping $CONTAINER with IP: $CONNECTORIP from spark cluster with IP: $SPARKCLUSTERIP"
+  docker exec -it quasar_spark_cluster "ping -c 3 $CONNECTORIP"
+  echo "ping spark cluster with IP: $SPARKCLUSTERIP from $CONTAINER with IP: $CONNECTORIP"
+  docker exec -it $CONTAINER "ping -c 3 $SPARKCLUSTERIP"
+  echo "done with ping test"
 elif [[ $CONTAINER == "quasar_spark_s3" ]]
 then
   upContainer quasar_spark_cluster
