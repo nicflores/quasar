@@ -3,20 +3,22 @@ FROM java:8u111-jre
 COPY wrapper_script.sh wrapper_script.sh
 ARG SPARK_VERSION
 
-# download what we need
-RUN mkdir -p /opt/hadoop
+ARG SPARK_VERSION
+ARG SCALA_VERSION
 
-RUN curl -L http://www-us.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz | tar -xz -C /opt/
-RUN curl -L https://downloads.lightbend.com/scala/2.11.11/scala-2.11.11.tgz | tar -xz -C /opt
-
-RUN ls -al /opt
+COPY spark-${SPARK_VERSION}-bin-hadoop2.7.tgz /tmp/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
+COPY scala-${SCALA_VERSION}.tgz /tmp/scala-${SCALA_VERSION}.tgz
 
 # scala setup
-RUN mv /opt/scala-2.11.11 /opt/scala
+RUN tar -xf /tmp/scala-${SCALA_VERSION}.tgz -C /opt/
+RUN rm -rf /tmp/scala-${SCALA_VERSION}.tgz
+RUN mv /opt/scala-${SCALA_VERSION} /opt/scala
 RUN export SCALA_HOME=/opt/scala
-RUN export PATH=$PATH/SCALA_HOME/bin
+RUN export PATH=$PATH:$SCALA_HOME/bin
 
 # spark setup
+RUN tar -xf /tmp/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz -C /opt/
+RUN rm -rf /tmp/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz
 RUN mv /opt/spark-${SPARK_VERSION}-bin-hadoop2.7 /opt/spark
 RUN export SPARK_HOME=/opt/spark
 RUN export PATH=$PATH:$SPARK_HOME/bin

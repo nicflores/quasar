@@ -52,7 +52,7 @@ branches:
 
 cache:
   directories:
-    - $HOME/.cache/quasar/marklogic
+    - $HOME/.cache/quasar/rpmDownloads
     - $HOME/.coursier/cache
     - $HOME/.ivy2/cache
     - $HOME/.sbt
