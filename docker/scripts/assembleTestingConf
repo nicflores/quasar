@@ -68,7 +68,7 @@ configure_spark_connector() {
   if [[ $CONTAINERNAME == "spark_cassandra"     ]]; then echo "spark_cassandra=\"spark://${SPARKCLUSTERIPADDR}:7077?cassandraHost=${CONNECTORIPADDR}&cassandraPort=9042\""  >> $CONFIGFILE; fi
   if [[ $CONTAINERNAME == "spark_elasticsearch" ]]; then echo "spark_elastic=\"spark://${SPARKCLUSTERIPADDR}:7077?elasticHost=${CONNECTORIPADDR}&elasticPort=9200\""        >> $CONFIGFILE; fi
   if [[ $CONTAINERNAME == "spark_ftp"           ]]; then echo "spark_hdfs=\"spark://${SPARKCLUSTERIPADDR}:7077?hdfsUrl=ftp://${CONNECTORIPADDR}:21&rootPath=/\""            >> $CONFIGFILE; fi
-  if [[ $CONTAINERNAME == "spark_hdfs"          ]]; then echo "spark_hdfs=\"spark://${SPARKCLUSTERIPADDR}:7077?hdfsUrl=hdfs://${CONNECTORIPADDR}:9000&rootPath=/\""         >> $CONFIGFILE; fi
+  if [[ $CONTAINERNAME == "spark_hdfs"          ]]; then echo "spark_hdfs=\"spark://${SPARKCLUSTERIPADDR}:7077?hdfsUrl=hdfs://${CONNECTORIPADDR}:8020&rootPath=/\""         >> $CONFIGFILE; fi
   if [[ $CONTAINERNAME == "spark_s3"            ]]; then echo "spark_hdfs=\"spark://${SPARKCLUSTERIPADDR}:7077?hdfsUrl=s3://<s3url>:<port>&rootPath=/\""                    >> $CONFIGFILE; fi
 }
 
