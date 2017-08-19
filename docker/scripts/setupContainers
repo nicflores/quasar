@@ -50,6 +50,15 @@ init_hdfs() {
   CONTAINER=$1
   echo "configuring hdfs..."
   sleep 5
+  if [[ ${TRAVIS:-} ]]
+  then
+    docker cp $TRAVIS_BUILD_DIR/docker/Dockerfiles/Hadoop/hdfs-site.xml $CONTAINER:/hadoop-2.7.3/etc/hadoop/hdfs-site.xml
+  else
+    docker cp $SCRIPTS_DIR/../Dockerfiles/Hadoop/hdfs-site.xml $CONTAINER:/hadoop-2.7.3/etc/hadoop/hdfs-site.xml
+  fi
+  sleep 5
+  docker restart $CONTAINER
+  sleep 5
   docker exec $CONTAINER /bin/bash -c "/hadoop-2.7.3/sbin/hadoop-daemon.sh start datanode; sleep 5; /hadoop-2.7.3/sbin/yarn-daemon.sh start nodemanager "
 }
 
