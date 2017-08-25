@@ -75,6 +75,7 @@ services:
       dockerfile: Spark-Dockerfile
       args:
         SPARK_VERSION: "2.2.0"
+        SCALA_VERSION: "2.11.11"
     network_mode: "bridge"
     ports:
       - "8081:8080"
