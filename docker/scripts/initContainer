@@ -2,17 +2,48 @@
 set -euo pipefail # STRICT MODE
 IFS=$'\n\t'       # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 
+######################################
+# Usage: initContainer <connector-name>
+# This script can be used to call docker-compose for you.
+# In some cases, before a container is created, we need to
+# download artifacts that are usind in the creation of 
+# various Quasar testing.
+
 
 function downloadFile() {
-  URL=$1
+
+  SPARK_VERSION="2.2.0"
+  HADDOP_VERSION="2.7.3"
+  SCALA_VERSION="2.11.11"
+
+  if [[ $1 == "spark" ]]
+  then
+    URL="http://www-us.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz"
+  elif [[ $1 == "hadoop" ]]
+  then
+    URL="http://www-us.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"
+  elif [[ $1 == "scala" ]]
+  then
+    URL="https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz"
+  else
+    echo "Please specify a downlaod url."
+    exit 1
+  fi
+
   FILE=$(echo ${URL##*/})
-  CACHE_DIR="$HOME/.cache/quasar/rpmDownloads"
-  mkdir -p $CACHE_DIR
-  CACHED_FILE="$CACHE_DIR/$FILE"
+
+  if [[ ${TRAVIS:-} ]]
+  then
+    CACHE_DIR="$HOME/.cache/quasar/rpmDownloads"
+    mkdir -p $CACHE_DIR
+    CACHED_FILE="$CACHE_DIR/$FILE"
+  else
+    CACHE_DIR="/tmp"
+    CACHED_FILE="$CACHE_DIR/$FILE"
+  fi
 
   if [[ $URL =~ "/spark/" ]] || [[ $URL =~ "/scala/" ]]
   then
-    echo "checking on spark or scala"
     TARGET_DIR="docker/Dockerfiles/Spark/"
     if [ -f $CACHED_FILE ]
     then
@@ -55,15 +86,15 @@ then
   sleep 5
 elif ([[ $CONTAINER == "quasar_spark_cassandra" ]] || [[ $CONTAINER == "quasar_spark_hdfs" ]] || [[ $CONTAINER == "quasar_spark_ftp" ]] || [[ $CONTAINER == "quasar_spark_elasticsearch" ]])
 then
-  # download spark, scala, and hadoop tarballs and cache them on travis
-  downloadFile "http://www-us.apache.org/dist/spark/spark-2.2.0/spark-2.2.0-bin-hadoop2.7.tgz"
-  downloadFile "http://www-us.apache.org/dist/hadoop/common/hadoop-2.7.3/hadoop-2.7.3.tar.gz"
-  downloadFile "https://downloads.lightbend.com/scala/2.11.11/scala-2.11.11.tgz"
-  upContainer quasar_spark_cluster
+  downloadFile "spark"
+  downloadFile "hadoop"
+  downloadFile "scala"
+  upContainer quasar_spark_cluster # we always need spark when testing with spark related connectors
   upContainer $CONTAINER
   sleep 5
 elif [[ $CONTAINER == "quasar_spark_s3" ]]
 then
+  downloadFile "spark"
   upContainer quasar_spark_cluster
   sleep 5
 else
