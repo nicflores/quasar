@@ -232,6 +232,9 @@ create_database() {
   elif [[ $CONTAINER == "quasar_spark_s3" ]]
   then
     create_database quasar_spark_cluster
+  elif [[ $CONTAINER == "quasar_metastore" ]]
+  then
+    upContainer $CONTAINER
   else
     echo "creating $CONTAINER"
     upContainer $CONTAINER
