@@ -14,8 +14,8 @@ before_install:
 
 # create all the docker containers we need for IT testing per matrix build
 install:
-  - docker/scripts/setupContainers -c quasar_metastore
-  - docker/scripts/setupContainers -c quasar_$CONNECTOR
+  - docker/scripts/setupContainers -u quasar_metastore
+  - docker/scripts/setupContainers -u quasar_$CONNECTOR
   - docker ps
 
 # populate the it/testing.conf file
