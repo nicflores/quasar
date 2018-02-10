@@ -24,21 +24,22 @@ import quasar.contrib.scalaz._
 import quasar.contrib.shapeless._
 import quasar.common.SortDir
 import quasar.fp._
-import quasar.frontend.logicalplan.{LogicalPlan => LP, Let => LPLet, _}
+import quasar.frontend.logicalplan.{Let => LPLet, LogicalPlan => LP, _}
 import quasar.std.StdLib
 import StdLib._
 import quasar.std.TemporalPart
 import quasar.sql.{SemanticAnalysis => SA}
 import SA._
-import quasar.RenderTree
-
 import matryoshka._
 import matryoshka.data._
 import matryoshka.implicits._
 import matryoshka.patterns._
 import pathy.Path._
-import scalaz.{Tree => _, Free => ZFree, _}, Scalaz._
-import shapeless.{Annotations => _, Data => _, :: => _, _}
+//import quasar.RenderTree
+
+import scalaz.{Free => ZFree, Tree => _, _}
+import Scalaz._
+import shapeless.{:: => _, Annotations => _, Data => _, _}
 
 final case class TableContext[T]
   (root: Option[T], full: () => T, subtables: Map[String, T])
@@ -768,9 +769,9 @@ object Compiler {
     (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP]) =
     apply[StateT[EitherT[scalaz.Free.Trampoline, SemanticError, ?], CompilerState[T], ?], T]
 
-  def compile[T: Equal: RenderTree]
+  def compile[T: Equal]
     (tree: Cofree[Sql, SA.Annotations])
-    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP]) //, S: Show[T])
+    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP]) //, S: Show[T], R: RenderTree[T])
       : SemanticError \/ T = {
     trampoline[T].compile(tree).eval(CompilerState(Nil, Context(Nil, Nil), 0)).run.run
   }
@@ -785,25 +786,18 @@ object Compiler {
     // Step 0: identify key expressions, and rewrite them by replacing the
     // group source with the source at the point where they might appear.
     def keysƒ(t: LP[(T, List[(T, ZFree[LP, Unit])])]): (T, List[(T, ZFree[LP, Unit])]) = {
-      @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-      @tailrec
       def groupedKeys(t: LP[T], newSrc: T): Option[List[(T, ZFree[LP, Unit])]] = {
-        t match {
+        Some(t) collect {
           case InvokeUnapply(set.GroupBy, Sized(src, structural.MakeArrayN(keys))) =>
-            Some(keys.map(_.transAna[ZFree[LP, Unit]]{ lp =>
+            keys.map(_.transAna[ZFree[LP, Unit]]{ lp =>
               if (lp.embed ≟ src) CoEnv[Unit, LP, T](-\/(()))
               else CoEnv[Unit, LP, T](\/-(lp))
-            }) strengthL newSrc)
-
-          case InvokeUnapply(func, Sized(src, _)) if func.effect ≟ Sifting =>
-            groupedKeys(src.project, newSrc)
-
-          case _ => None
+            }) strengthL newSrc
         }
       }
 
       val tf = t.map(_._1)
-      (tf.embed, groupedKeys(tf, tf.embed).getOrElse(t.foldMap(_._2).distinctE.toList))
+      (tf.embed, groupedKeys(tf, tf.embed).getOrElse(t.foldMap(_._2)))
     }
 
     val sources: List[(T, ZFree[LP, Unit])] = tree.cata(keysƒ)._2
@@ -812,7 +806,38 @@ object Compiler {
 
     val KS = MonadState_[State[KeyState, ?], KeyState]
 
-    def flpCata(tree: T, flp: ZFree[LP, Unit]) = flp.cata(interpret[LP, Unit, T](_ => tree, _.embed))
+    def makeKey(tree: T, flp: ZFree[LP, Unit]): T = flp.cata(interpret[LP, Unit, T](_ => tree, _.embed))
+
+    def pathToHole[F[_]: Traverse, A: Equal, U](p: (ZFree[F, A], U))(
+      implicit R: Recursive.Aux[U, F]
+    ): Option[CoEnv[U, F, (ZFree[F, A], U)]] = {
+      type M[A] = OptionT[State[Int, ?], A]
+      p match {
+        case (Embed(CoEnv(-\/(_))), u) => CoEnv(-\/(u)).some
+        case (a, b) => {
+          val fa = a.project.toList
+          val fb = b.project.traverse(u =>
+            OptionT(for {
+              i <- State.get[Int]
+              _ <- State.put(i + 1)
+              a = fa.index(i)
+            } yield a strengthR u)
+          ).run.eval(0)
+          fb.map(x => CoEnv(\/-(x)))
+        }
+      }
+    }
+
+    def isGroupKey(source: (T, ZFree[LP, Unit]), t: T): Boolean = {
+      (source._2, t).anaM[ZFree[LP, T]](pathToHole[LP, Unit, T]).exists {
+        z => if(source._2 === z.as(())) { z.distinctE.toList match {
+          case  List(Embed(InvokeUnapply(func, Sized(src)))) if func.effect ≟ Sifting =>
+            src === source._1
+          case List(x) => x === source._1
+          case _ => false
+        }} else false
+      }
+    }
 
     // Step 1: annotate nodes containing the keys.
     val ann: State[KeyState, Cofree[LP, Boolean]] = tree.transAnaM {
@@ -824,13 +849,13 @@ object Compiler {
             val l = if (t ≟ expr) Free[T](name).embed else t
             (l, flp)
           }
-          keys2 = srcs2.map { case (t, flp) => flpCata(t,flp) }
+          keys2 = srcs2.map { case (t, flp) => makeKey(t,flp) }
           _ <- KS.put((srcs2, keys2))
         } yield EnvT((keys.element(let.embed), let: LP[T]))
 
       case other =>
-        KS.gets { case (_, k) =>
-          EnvT((k.element(other.embed), other))
+        KS.gets { case (s, _) =>
+          EnvT((s.any(isGroupKey(_, other.embed)), other))
         }
     }
 
@@ -849,7 +874,7 @@ object Compiler {
       }
     }
 
-    ann.eval((sources, sources.map { case (t, flp) => flpCata(t,flp) })).ana[T](rewriteƒ)
+    ann.eval((sources, sources.map { case (t, flp) => makeKey(t,flp) })).ana[T](rewriteƒ)
 
   }
 
