@@ -35,7 +35,8 @@ import matryoshka.data._
 import matryoshka.implicits._
 import matryoshka.patterns._
 import pathy.Path._
-//import quasar.RenderTree
+import quasar.RenderTree
+//import quasar.RenderTree.ops._
 
 import scalaz.{Free => ZFree, Tree => _, _}
 import Scalaz._
@@ -754,7 +755,7 @@ final class Compiler[M[_], T: Equal]
     (tree: Cofree[Sql, SA.Annotations])
     (implicit
       MErr: MonadError_[M, SemanticError],
-      MState: MonadState[M, CompilerState[T]]) //, S: Show[T], R: RenderTree[T])
+      MState: MonadState[M, CompilerState[T]], S: Show[T], R: RenderTree[T])
       : M[T] = {
     compile0(tree).map(Compiler.reduceGroupKeys[T])
   }
@@ -771,7 +772,7 @@ object Compiler {
 
   def compile[T: Equal]
     (tree: Cofree[Sql, SA.Annotations])
-    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP]) //, S: Show[T], R: RenderTree[T])
+    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP], S: Show[T], R: RenderTree[T])
       : SemanticError \/ T = {
     trampoline[T].compile(tree).eval(CompilerState(Nil, Context(Nil, Nil), 0)).run.run
   }
@@ -781,7 +782,7 @@ object Compiler {
     */
   def reduceGroupKeys[T: Equal]
     (tree: T)
-    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP]) //, S: Show[T], R: RenderTree[T])
+    (implicit TR: Recursive.Aux[T, LP], TC: Corecursive.Aux[T, LP], S: Show[T], R: RenderTree[T])
       : T = {
     // Step 0: identify key expressions, and rewrite them by replacing the
     // group source with the source at the point where they might appear.
@@ -829,14 +830,26 @@ object Compiler {
     }
 
     def isGroupKey(source: (T, ZFree[LP, Unit]), t: T): Boolean = {
-      (source._2, t).anaM[ZFree[LP, T]](pathToHole[LP, Unit, T]).exists {
+      val w = (source._2, t).anaM[ZFree[LP, T]](pathToHole[LP, Unit, T])
+      val mw = w.map(f => (f.as(()), f.toList))
+      //println(s"mw: ${mw.render.shows}")
+      w.exists {
         z => if(source._2 === z.as(())) { z.distinctE.toList match {
-          case  List(Embed(InvokeUnapply(func, Sized(src)))) if func.effect ≟ Sifting =>
+          case  List(em @ Embed(InvokeUnapply(func, Sized(src, _*)))) if func.effect ≟ Sifting => {
+            //println(s"Embed: ${em.render.shows}")
+            //println(s"src: ${src.render.shows}")
+            //println(s"source: ${source._1.render.shows}");
             src === source._1
-          case List(x) => x === source._1
+          }
+          case List(x) =>
+            //println("no filter")
+            //println(s"x: ${x.render.shows}")
+            //println(s"source._1: ${source._1.render.shows}")
+            x === source._1
           case _ => false
         }} else false
       }
+
     }
 
     // Step 1: annotate nodes containing the keys.
