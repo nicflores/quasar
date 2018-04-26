@@ -17,8 +17,8 @@
 package quasar.server
 
 import slamdata.Predef._
-import quasar.api.services._
-import quasar.api.{redirectService, staticFileService, FailedResponseOr, FailedResponseT}
+import quasar.web.api.services._
+import quasar.web.api.{redirectService, staticFileService, FailedResponseOr, FailedResponseT}
 import quasar.cli.Cmd
 import quasar.config._
 import quasar.console.{logErrors, stdout}

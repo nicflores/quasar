@@ -16,7 +16,7 @@
 
 package quasar
 
-import quasar.api._
+import quasar.web.api._
 import quasar.fp._, free._
 import quasar.fs.{FileSystemError, PhysicalError}
 import quasar.fs.mount.{Mounting, MountingError}
