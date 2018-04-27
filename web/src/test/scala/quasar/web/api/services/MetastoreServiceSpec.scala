@@ -48,7 +48,7 @@ class MetastoreServiceSpec extends quasar.Qspec {
     (for {
       ms    <- MetaStoreFixture.createNewTestMetastore()
       inter <- Fixture.inMemFSWeb(persist = persist, metaRefT = TaskRef(ms))
-    } yield (quasar.api.services.metastore.service[CoreEffIO].toHttpService(inter).orNotFound, ms)).unsafePerformSync
+    } yield (quasar.web.api.services.metastore.service[CoreEffIO].toHttpService(inter).orNotFound, ms)).unsafePerformSync
 
   def service(persist: DbConnectionConfig => MainTask[Unit] = _ => ().point[MainTask]): Service[Request, Response] =
     serviceWithMetaStore(persist)._1
@@ -63,7 +63,7 @@ class MetastoreServiceSpec extends quasar.Qspec {
         parameters = Map.empty)
       type Eff[A] = Coproduct[Task, MetaStoreLocation, A]
       val inter = liftMT[Task, FailedResponseT] compose (reflNT[Task] :+: MetaStoreLocation.impl.constant(dbConfig))
-      val service = quasar.api.services.metastore.service[Eff].toHttpService(inter).orNotFound
+      val service = quasar.web.api.services.metastore.service[Eff].toHttpService(inter).orNotFound
       val get = Request()
       val resp = service(get).unsafePerformSync
       resp.as[Json].unsafePerformSync must_===

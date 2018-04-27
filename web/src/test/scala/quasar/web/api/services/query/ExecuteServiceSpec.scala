@@ -23,6 +23,7 @@ import quasar.web.api._, ApiErrorEntityDecoder._, ToApiError.ops._
 import quasar.web.api.matchers._
 import quasar.web.api.services.VCacheFixture
 import quasar.web.api.services.Fixture._
+import quasar.web.api.PathUtils._
 import quasar.common.{Map => _, _}
 import quasar.contrib.pathy._, PathArbitrary._
 import quasar.effect.ScopeExecution
@@ -60,7 +61,7 @@ import scalaz._, Scalaz._
 import scalaz.concurrent.Task
 import scalaz.stream.Process
 import shapeless.tag.@@
-import quasar.api.PathUtils._
+
 
 class ExecuteServiceSpec extends quasar.Qspec with FileSystemFixture with Http4s {
   import queryFixture._

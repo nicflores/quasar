@@ -25,7 +25,7 @@ import quasar.fp._
 import quasar.fp.numeric._
 import quasar.fs._, InMemory._, mount._
 import quasar.main.CoreEffIO
-import quasar.api.services.Fixture
+import quasar.web.api.services.Fixture
 import quasar.sql._
 import quasar.sql.fixpoint._
 
