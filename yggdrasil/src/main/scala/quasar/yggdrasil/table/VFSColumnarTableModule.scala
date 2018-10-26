@@ -148,9 +148,9 @@ trait VFSColumnarTableModule extends BlockStoreColumnarTableModule with Logging 
   }
 
   /**
-   * Closes the database and removes it from the internal state. This doesn't
-   * remove the dataset from disk.
-   */
+    * Closes the database and removes it from the internal state. This doesn't
+    * remove the dataset from disk.
+    */
   def closeDB(path: AFile): IO[Unit] = {
     val back = for {
       blob <- OptionT(vfs.readPath(path))
@@ -163,33 +163,29 @@ trait VFSColumnarTableModule extends BlockStoreColumnarTableModule with Logging 
     back.run.map(_ => ())
   }
 
-  def commitDB(blob: Blob, version: Version, db: NIHDB): IO[Unit] = {
-    // last-wins semantics
-    lazy val replaceM: OptionT[IO, Unit] = for {
+  /**
+    * Commits the new version and closes (if exists) the old version of the database.
+    */
+  def commitDB(blob: Blob, version: Version, db: NIHDB): IO[Boolean] = {
+    val closeOldM = for {
       oldHead <- OptionT(vfs.headOfBlob(blob))
       oldDB <- OptionT(IO(Option(dbs.get((blob, oldHead)))))
-
-      check <- IO(dbs.replace((blob, oldHead), oldDB, db)).liftM[OptionT]
-
-      _ <- if (check)
-        IO.fromFutureShift(IO(oldDB.close)).liftM[OptionT]
-      else
-        replaceM
-    } yield ()
-
-    val insert = for {
-      check <- IO(dbs.putIfAbsent((blob, version), db))
-
-      _ <- if (check == null)
-        vfs.commit(blob, version)
-      else
-        commitDB(blob, version, db)
-    } yield ()
+      _ <- IO(log.trace(s"closing old database for blob $blob and version $oldHead")).liftM[OptionT]
+      _ <- IO.fromFutureShift(IO(oldDB.close)).liftM[OptionT]
+      check <- IO(dbs.remove((blob, oldHead), oldDB)).liftM[OptionT]
+    } yield check
 
     for {
-      _ <- IO(log.trace(s"attempting to commit blob/version: $blob/$version"))
-      _ <- replaceM.getOrElseF(insert)
-    } yield ()
+      check <- IO(dbs.putIfAbsent((blob, version), db))
+      _ <- if (check == null)
+        for {
+          _ <- IO(log.trace(s"committing blob $blob and version $version"))
+          _ <- vfs.commit(blob, version)
+          _ <- closeOldM.run      // just run this for the effect; we don't really care if it passes or fails
+        } yield ()
+      else
+        IO(log.trace(s"commit on blob $blob and version $version failed due to race condition (should be impossible?)"))
+    } yield check == null;
   }
 
   def ingest(path: PrecogPath, ingestion: Stream[IO, JValue]): EitherT[IO, ResourceError, Unit] = {
@@ -223,18 +219,18 @@ trait VFSColumnarTableModule extends BlockStoreColumnarTableModule with Logging 
   }
 
   /**
-   * Produces a Table which will, when run the first time, write itself out to
-   * NIHDB storage in a temporary directory, which in turn the subsequent reads
-   * will consume. The very first running of the table must be completed entirely
-   * before subsequent reads may proceed. Once the first read is completed, all
-   * subsequent reads may happen in parallel. The disposal action produced will
-   * shut down the temporary database and remove the directory.
-   *
-   * If `earlyForce` is `true`, then the effect of running the *entire* input
-   * table stream and writing it out to disk will be sequenced into the outer
-   * `IO`. This flag is important in the event that the output `Table` will be
-   * sequenced multiple times *interleaved*, which is of course a deadlock.
-   */
+    * Produces a Table which will, when run the first time, write itself out to
+    * NIHDB storage in a temporary directory, which in turn the subsequent reads
+    * will consume. The very first running of the table must be completed entirely
+    * before subsequent reads may proceed. Once the first read is completed, all
+    * subsequent reads may happen in parallel. The disposal action produced will
+    * shut down the temporary database and remove the directory.
+    *
+    * If `earlyForce` is `true`, then the effect of running the *entire* input
+    * table stream and writing it out to disk will be sequenced into the outer
+    * `IO`. This flag is important in the event that the output `Table` will be
+    * sequenced multiple times *interleaved*, which is of course a deadlock.
+    */
   def cacheTable(table: Table, earlyForce: Boolean): IO[Disposable[IO, Table]] = {
     def zipWithIndex[F[_]: Monad, A](st: StreamT[F, A]): StreamT[F, (A, Int)] = {
       StreamT.unfoldM((st, 0)) {
